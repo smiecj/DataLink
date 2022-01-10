@@ -96,6 +96,13 @@
 		</dependency>-->
     </dependencies>
 
+   <repositories>
+    <repository>
+        <id>spring</id>
+        <url>https://maven.aliyun.com/repository/spring</url>
+    </repository>
+  </repositories>
+
     <build>
         <plugins>
             <!-- compiler plugin -->

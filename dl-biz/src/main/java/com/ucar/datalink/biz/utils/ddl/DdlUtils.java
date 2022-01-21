@@ -19,6 +19,8 @@ import org.springframework.util.Assert;
 import java.sql.*;
 import java.util.*;
 
+import com.ucar.datalink.common.errors.TableInvalidException;
+
 /**
  * 参考自Alibaba-Otter
  * Created by lubiao on 2017/3/8.
@@ -128,7 +130,15 @@ public class DdlUtils {
 
                         while ((tableResultSet != null) && tableResultSet.next()) {
                             Map<String, Object> values = readColumns(tableResultSet, getDescriptorsForTable());
-                            table = generateTable(metaDataWrapper, values);
+
+                            try {
+                                table = generateTable(metaDataWrapper, values);
+                            }
+                            catch (TableInvalidException e) {
+                                logger.warn("[findTable] Table maybe invalid: " + e.getMessage());
+                                continue;
+                            }
+                            
                             if (table.getName().equalsIgnoreCase(tableName)) {
                                 break;
                             }
@@ -193,7 +203,14 @@ public class DdlUtils {
                         while ((tableData != null) && tableData.next()) {
                             Map<String, Object> values = readColumns(tableData, getDescriptorsForTable());
 
-                            Table table = generateTable(metaData, values);
+                            Table table = null;
+                            try {
+                                table = generateTable(metaData, values);
+                            }
+                            catch (TableInvalidException e) {
+                                logger.warn("[findTables] Table maybe invalid: " + e.getMessage());
+                                continue;
+                            }
                             if ((tableNameFilter == null)
                                     || tableNameFilter.accept(catalogName, schemaName, table.getName())) {
                                 tables.add(table);
@@ -241,6 +258,12 @@ public class DdlUtils {
             table.setDescription((String) values.get("REMARKS"));
             table.addColumns(generateColumns(metaData, tableName));
             table.addIndices(generateIndices(metaData, tableName));
+
+            // 修复表名不规范（比如带有点），导致解析不出 column 列表，并导致抛出空指针异常的问题
+            // 上层需要捕获这个异常，并跳过这种不规范的表
+            if (table.getColumns().length == 0) {
+                throw new TableInvalidException(String.format("Table name: %s, get column size is 0", tableName));
+            }
 
             Collection<String> primaryKeys = readPrimaryKeyNames(metaData, tableName);
 

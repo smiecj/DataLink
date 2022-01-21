@@ -18,6 +18,7 @@ logback_configurationFile=$base/conf/logback.xml
 export LANG=en_US.UTF-8
 export BASE=$base
 
+
 if [ -f $base/bin/manager.pid ] ; then
     ps -fe | grep datalink-manager | grep -v grep > /dev/null 2>&1
     if [ $? -ne 0 ];then
@@ -92,8 +93,12 @@ if [ -e $manager_conf -a -e $logback_configurationFile ]
 then
 
 	for i in $base/lib/*;
-		do CLASSPATH=$i:"$CLASSPATH";
+	do
+		if [[ "$i" =~ .*jar$ ]]; then
+			CLASSPATH=$i:"$CLASSPATH";
+		fi
 	done
+
  	CLASSPATH="$base/conf:$CLASSPATH";
 
  	echo "cd to $bin_abs_path for workaround relative path"

@@ -146,6 +146,39 @@ public class MysqlTaskController extends BaseTaskController {
         return "success";
     }
 
+    @RequestMapping(value = "/getMysqlTask")
+    @ResponseBody
+    public MysqlTaskModel getMysqlTask(Long id) {
+        TaskInfo taskInfo = taskService.getTask(id);
+        Map<String, PluginWriterParameter> writerParameterMap = getWriterParameters();
+        taskInfo.getTaskWriterParameterObjs().forEach(i -> writerParameterMap.put(i.getPluginName(), i));
+
+        MysqlTaskModel mysqlTaskModel = new MysqlTaskModel(
+                new TaskModel.TaskBasicInfo(
+                        id,
+                        taskInfo.getTaskName(),
+                        taskInfo.getTaskDesc(),
+                        taskInfo.getTargetState(),
+                        taskInfo.getGroupId()
+                ),
+                writerParameterMap,
+                groupService.getAllGroups().stream().filter(i -> i.getId().equals(taskInfo.getGroupId())).collect(Collectors.toList()),
+                TargetState.getAllStates(),
+                mediaService.getMediaSourcesByTypes(MediaSourceType.MYSQL, MediaSourceType.SDDL),
+                PluginWriterParameter.RetryMode.getAllModes(),
+                RdbmsWriterParameter.SyncMode.getAllModes(),
+                CommitMode.getAllCommitModes(),
+                Lists.newArrayList(EventType.INSERT, EventType.UPDATE, EventType.DELETE),
+                GroupSinkMode.getAll(),
+                SerializeMode.getAllSerializeModes(),
+                PartitionMode.getAllPartitionModes(),
+                (MysqlReaderParameter) taskInfo.getTaskReaderParameterObj(),
+                null
+        );
+        mysqlTaskModel.setCurrentWriters(taskInfo.getTaskWriterParameterObjs().stream().collect(Collectors.toMap(PluginWriterParameter::getPluginName, i -> "1")));
+        return mysqlTaskModel;
+    }
+
     @RequestMapping(value = "/toUpdateMysqlTask")
     public ModelAndView toUpdateMysqlTask(Long id) {
         ModelAndView mav = new ModelAndView("task/mysqlTaskUpdate");

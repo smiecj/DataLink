@@ -12,6 +12,7 @@ public class MediaSourceView{
 
     private Long id;
     private String name;
+    private String schema;
     private Date createTime;
     private Date modifyTime;
     private RdbMediaSrcParameter rdbMediaSrcParameter = new RdbMediaSrcParameter();
@@ -23,6 +24,14 @@ public class MediaSourceView{
 
     public void setName(String name) {
         this.name = name;
+    }
+
+    public String getSchema() {
+        return schema;
+    }
+
+    public void setSchema(String schema) {
+        this.schema = schema;
     }
 
     public RdbMediaSrcParameter getRdbMediaSrcParameter() {

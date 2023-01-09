@@ -110,6 +110,10 @@ public class MediaSourceController {
             view.getRdbMediaSrcParameter().setName(i.getName());
             view.getRdbMediaSrcParameter().setMediaSourceType(i.getType());
             view.setCreateTime(i.getCreateTime());
+            
+            view.setSchema(((RdbMediaSrcParameter) i.getParameterObj()).getNamespace());
+
+            view.getRdbMediaSrcParameter().setPort(((RdbMediaSrcParameter) i.getParameterObj()).getPort());
 
             RdbMediaSrcParameter.WriteConfig writeConfig = new RdbMediaSrcParameter.WriteConfig();
             writeConfig.setWriteHost(((RdbMediaSrcParameter) i.getParameterObj()).getWriteConfig().getWriteHost());
@@ -119,6 +123,7 @@ public class MediaSourceController {
             RdbMediaSrcParameter.ReadConfig readConfig = new RdbMediaSrcParameter.ReadConfig();
             readConfig.setHosts(((RdbMediaSrcParameter) i.getParameterObj()).getReadConfig().getHosts());
             readConfig.setUsername(((RdbMediaSrcParameter) i.getParameterObj()).getReadConfig().getUsername());
+            readConfig.setPassword(((RdbMediaSrcParameter) i.getParameterObj()).getReadConfig().getDecryptPassword());
             view.getRdbMediaSrcParameter().setReadConfig(readConfig);
 
             return view;
